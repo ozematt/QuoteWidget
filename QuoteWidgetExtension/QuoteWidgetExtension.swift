@@ -114,40 +114,36 @@ struct WidgetView: View {
     }
 
     var body: some View {
-        ZStack {
-            background
-            VStack(alignment: .leading, spacing: 0) {
-                HStack(spacing: 6) {
-                    Image(systemName: "sun.max.fill")
-                        .font(.system(size: headerSize, weight: .medium))
-                        .foregroundColor(.white.opacity(0.9))
-                    Text("CYTAT DNIA")
-                        .font(.system(size: headerSize - 2, weight: .semibold, design: .rounded))
-                        .tracking(1.2)
-                        .foregroundColor(.white.opacity(0.7))
-                }
-
-                Spacer().frame(height: padding * 0.7)
-
-                Text(quote.text)
-                    .font(.system(size: fontSize, weight: .regular, design: .serif))
-                    .foregroundColor(.white)
-                    .lineLimit(lineLimit)
-                    .lineSpacing(3)
-                    .fixedSize(horizontal: false, vertical: true)
-
-                Spacer().frame(height: padding * 0.7)
-
-                Text(quote.author.uppercased())
-                    .font(.system(size: authorSize, weight: .bold, design: .rounded))
-                    .tracking(1.0)
-                    .foregroundColor(.white.opacity(0.6))
-                    .lineLimit(1)
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 6) {
+                Image(systemName: "sun.max.fill")
+                    .font(.system(size: headerSize, weight: .medium))
+                    .foregroundColor(.white.opacity(0.9))
+                Text("CYTAT DNIA")
+                    .font(.system(size: headerSize - 2, weight: .semibold, design: .rounded))
+                    .tracking(1.2)
+                    .foregroundColor(.white.opacity(0.7))
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-            .padding(padding)
+
+            Spacer().frame(height: padding * 0.7)
+
+            Text(quote.text)
+                .font(.system(size: fontSize, weight: .regular, design: .serif))
+                .foregroundColor(.white)
+                .lineLimit(lineLimit)
+                .lineSpacing(3)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Spacer().frame(height: padding * 0.7)
+
+            Text(quote.author.uppercased())
+                .font(.system(size: authorSize, weight: .bold, design: .rounded))
+                .tracking(1.0)
+                .foregroundColor(.white.opacity(0.6))
+                .lineLimit(1)
         }
-        // iOS 17+ wymaga containerBackground
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .padding(padding)
         .modifier(WidgetBackgroundModifier(background: background))
     }
 }
