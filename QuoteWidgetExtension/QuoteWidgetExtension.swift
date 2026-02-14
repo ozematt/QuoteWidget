@@ -108,48 +108,36 @@ struct WidgetView: View {
     }
 
     var body: some View {
-        ZStack {
-            RadialGradient(
-                gradient: Gradient(colors: [
-                    Color(red: 0.1, green: 0.05, blue: 0.05),
-                    Color(red: 0.0, green: 0.0, blue: 0.0)
-                ]),
-                center: .center,
-                startRadius: 20,
-                endRadius: 500
-            )
-
-            VStack(alignment: .leading, spacing: 0) {
-                HStack(spacing: 6) {
-                    Image(systemName: "sun.max.fill")
-                        .font(.system(size: headerSize, weight: .medium))
-                        .foregroundColor(.white.opacity(0.9))
-                    Text("CYTAT DNIA")
-                        .font(.system(size: headerSize - 2, weight: .semibold, design: .rounded))
-                        .tracking(1.2)
-                        .foregroundColor(.white.opacity(0.7))
-                }
-
-                Spacer().frame(height: padding * 0.7)
-
-                Text(quote.text)
-                    .font(.system(size: fontSize, weight: .regular, design: .serif))
-                    .foregroundColor(.white)
-                    .lineLimit(lineLimit)
-                    .lineSpacing(3)
-                    .fixedSize(horizontal: false, vertical: true)
-
-                Spacer().frame(height: padding * 0.7)
-
-                Text(quote.author.uppercased())
-                    .font(.system(size: authorSize, weight: .bold, design: .rounded))
-                    .tracking(1.0)
-                    .foregroundColor(.white.opacity(0.6))
-                    .lineLimit(1)
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 6) {
+                Image(systemName: "sun.max.fill")
+                    .font(.system(size: headerSize, weight: .medium))
+                    .foregroundColor(.white.opacity(0.9))
+                Text("CYTAT DNIA")
+                    .font(.system(size: headerSize - 2, weight: .semibold, design: .rounded))
+                    .tracking(1.2)
+                    .foregroundColor(.white.opacity(0.7))
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-            .padding(padding)
+
+            Spacer().frame(height: padding * 0.7)
+
+            Text(quote.text)
+                .font(.system(size: fontSize, weight: .regular, design: .serif))
+                .foregroundColor(.white)
+                .lineLimit(lineLimit)
+                .lineSpacing(3)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Spacer().frame(height: padding * 0.7)
+
+            Text(quote.author.uppercased())
+                .font(.system(size: authorSize, weight: .bold, design: .rounded))
+                .tracking(1.0)
+                .foregroundColor(.white.opacity(0.6))
+                .lineLimit(1)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .padding(padding)
     }
 }
 
@@ -159,6 +147,17 @@ struct QuoteWidgetEntryView: View {
 
     var body: some View {
         WidgetView(quote: entry.quote)
+            .containerBackground(for: .widget) {
+                RadialGradient(
+                    gradient: Gradient(colors: [
+                        Color(red: 0.1, green: 0.05, blue: 0.05),
+                        Color(red: 0.0, green: 0.0, blue: 0.0)
+                    ]),
+                    center: .center,
+                    startRadius: 20,
+                    endRadius: 500
+                )
+            }
     }
 }
 
@@ -174,5 +173,6 @@ struct QuoteWidget: Widget {
         .configurationDisplayName("Cytat Dnia")
         .description("Wyświetla losowy cytat z Twojej kolekcji.")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
+        .contentMarginsDisabled()
     }
 }
