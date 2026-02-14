@@ -109,20 +109,8 @@ struct WidgetView: View {
 
     var body: some View {
         ZStack {
-            // 1. Nowe kolory - ciemnoczerwony → czarny
-            RadialGradient(
-                gradient: Gradient(colors: [
-                    Color(red: 0.1, green: 0.05, blue: 0.05),
-                    Color(red: 0.0, green: 0.0, blue: 0.0)
-                ]),
-                center: .center,
-                startRadius: 20,
-                endRadius: 500
-            )
-
             VStack(alignment: .leading, spacing: 0) {
                 HStack(spacing: 6) {
-                    // 2. Białe słońce
                     Image(systemName: "sun.max.fill")
                         .font(.system(size: headerSize, weight: .medium))
                         .foregroundColor(.white.opacity(0.9))
@@ -134,7 +122,6 @@ struct WidgetView: View {
 
                 Spacer().frame(height: padding * 0.7)
 
-                // 3. Czcionka - large taki sam rozmiar jak medium (16pt)
                 Text(quote.text)
                     .font(.system(size: fontSize, weight: .regular, design: .serif))
                     .foregroundColor(.white)
@@ -152,6 +139,17 @@ struct WidgetView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             .padding(padding)
+        }
+        .containerBackground(for: .widget) {
+            RadialGradient(
+                gradient: Gradient(colors: [
+                    Color(red: 0.1, green: 0.05, blue: 0.05),
+                    Color(red: 0.0, green: 0.0, blue: 0.0)
+                ]),
+                center: .center,
+                startRadius: 20,
+                endRadius: 500
+            )
         }
     }
 }
