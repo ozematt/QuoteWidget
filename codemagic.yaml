@@ -10,7 +10,7 @@ workflows:
         XCODE_SCHEME: "QuoteWidget"
 
     scripts:
-      - name: Build IPA
+      - name: Build app + widget
         script: |
           xcodebuild \
             -project "$XCODE_PROJECT" \
@@ -25,10 +25,13 @@ workflows:
 
       - name: Package IPA
         script: |
+          APP_PATH=$(find derived_data/Build/Products/Debug-iphoneos -name "*.app" -not -name "*.appex" | head -1)
+          echo "Found app: $APP_PATH"
           mkdir -p Payload
-          cp -r derived_data/Build/Products/Debug-iphoneos/QuoteWidget.app Payload/
+          cp -r "$APP_PATH" Payload/
           zip -r QuoteWidget.ipa Payload
           rm -rf Payload
+          echo "IPA created successfully"
 
     artifacts:
       - "*.ipa"

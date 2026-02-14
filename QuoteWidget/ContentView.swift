@@ -143,7 +143,7 @@ struct QuoteRow: View {
                                 }
                             }
                             .frame(width: AppConfig.Layout.deleteWidth, height: geometry.size.height)
-                            .opacity(min(1, max(0, (-dragOffset - 20) / 60)))
+                            .opacity(min(1, max(0, (-dragOffset - 5) / 80)))
                         }
 
                         // Karta cytatu na wierzchu
@@ -169,18 +169,21 @@ struct QuoteRow: View {
                         .background(CardBackground())
                         .offset(x: dragOffset)
                         .gesture(
-                            DragGesture()
+                            DragGesture(minimumDistance: 20, coordinateSpace: .local)
                                 .onChanged { value in
-                                    if value.translation.width < 0 {
-                                        dragOffset = max(value.translation.width, -AppConfig.Layout.deleteWidth)
-                                    }
+                                    // Tylko poziomy swipe - ignoruj pionowy
+                                    let isHorizontal = abs(value.translation.width) > abs(value.translation.height)
+                                    guard isHorizontal && value.translation.width < 0 else { return }
+                                    dragOffset = max(value.translation.width, -AppConfig.Layout.deleteWidth)
                                 }
                                 .onEnded { value in
-                                    
+                                    let isHorizontal = abs(value.translation.width) > abs(value.translation.height)
                                     withAnimation(AppConfig.springAnimation) {
-                                        dragOffset = value.translation.width < -AppConfig.Layout.swipeThreshold
-                                            ? -AppConfig.Layout.deleteWidth
-                                            : 0
+                                        if isHorizontal && value.translation.width < -AppConfig.Layout.swipeThreshold {
+                                            dragOffset = -AppConfig.Layout.deleteWidth
+                                        } else {
+                                            dragOffset = 0
+                                        }
                                     }
                                 }
                         )
@@ -251,8 +254,8 @@ struct QuoteFormView: View {
                                 .frame(height: 220)
 
                             if quoteText.isEmpty {
-                                Text("")
-                                    .font(.system(size: 16, weight: .regular, design: .serif))
+                                Text("Dotknij aby dodać cytat...")
+                                    .font(.system(size: 20, weight: .regular, design: .serif))
                                     .foregroundColor(AppConfig.Colors.textMuted)
                                     .multilineTextAlignment(.center)
                                     .padding(.horizontal, 20)
@@ -284,7 +287,7 @@ struct QuoteFormView: View {
                                 .frame(height: 50)
 
                             TextField("", text: $author,
-                                      prompt: Text("")
+                                      prompt: Text("Dotknij aby dodać autora...")
                                         .foregroundColor(AppConfig.Colors.textMuted))
                                 .font(.system(size: 14, weight: .light))
                                 .tracking(2.0)
@@ -396,6 +399,7 @@ struct ContentView: View {
                             Color.clear.frame(height: 40)
                         }
                     }
+                    .scrollDismissesKeyboard(.immediately)
                 }
             }
             .navyBackground()
