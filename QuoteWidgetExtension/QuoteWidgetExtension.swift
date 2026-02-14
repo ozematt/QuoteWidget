@@ -109,6 +109,16 @@ struct WidgetView: View {
 
     var body: some View {
         ZStack {
+            RadialGradient(
+                gradient: Gradient(colors: [
+                    Color(red: 0.1, green: 0.05, blue: 0.05),
+                    Color(red: 0.0, green: 0.0, blue: 0.0)
+                ]),
+                center: .center,
+                startRadius: 20,
+                endRadius: 500
+            )
+
             VStack(alignment: .leading, spacing: 0) {
                 HStack(spacing: 6) {
                     Image(systemName: "sun.max.fill")
@@ -139,17 +149,6 @@ struct WidgetView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             .padding(padding)
-        }
-        .containerBackground(for: .widget) {
-            RadialGradient(
-                gradient: Gradient(colors: [
-                    Color(red: 0.1, green: 0.05, blue: 0.05),
-                    Color(red: 0.0, green: 0.0, blue: 0.0)
-                ]),
-                center: .center,
-                startRadius: 20,
-                endRadius: 500
-            )
         }
     }
 }
