@@ -5,25 +5,11 @@ workflows:
     instance_type: mac_mini_m2
 
     environment:
-      ios_signing:
-        distribution_type: development
       vars:
         XCODE_PROJECT: "QuoteWidget.xcodeproj"
         XCODE_SCHEME: "QuoteWidget"
-        BUNDLE_ID: "com.loranstudio.QuoteWidget"  # ZMIEŃ na swój Bundle ID
 
     scripts:
-      - name: Set Xcode version
-        script: xcode-select -p
-
-      - name: Install dependencies (jeśli używasz CocoaPods)
-        script: |
-          if [ -f "Podfile" ]; then
-            pod install
-          else
-            echo "No Podfile found, skipping pod install"
-          fi
-
       - name: Build IPA
         script: |
           xcodebuild \
@@ -37,7 +23,7 @@ workflows:
             CODE_SIGNING_ALLOWED=NO \
             build
 
-      - name: Package IPA (bez podpisu - do AltStore)
+      - name: Package IPA
         script: |
           mkdir -p Payload
           cp -r derived_data/Build/Products/Debug-iphoneos/QuoteWidget.app Payload/
@@ -46,12 +32,11 @@ workflows:
 
     artifacts:
       - "*.ipa"
-      - derived_data/Build/Products/Debug-iphoneos/*.app
 
     publishing:
       email:
         recipients:
-          - neutralnie7@gmail.com  # ZMIEŃ na swój email
+          - your@email.com
         notify:
           success: true
           failure: true
