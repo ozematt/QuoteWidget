@@ -15,26 +15,21 @@ struct Provider: TimelineProvider {
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<QuoteEntry>) -> Void) {
         let entry = QuoteEntry(date: Date(), quote: resolveQuote())
-
-        // Odśwież o północy - nowy cytat każdego dnia
         let midnight = Calendar.current.startOfDay(
             for: Calendar.current.date(byAdding: .day, value: 1, to: Date())!
         )
         completion(Timeline(entries: [entry], policy: .after(midnight)))
     }
 
-    // MARK: - Logika wyboru cytatu
     private func resolveQuote() -> Quote {
         let defaults = AppConfig.defaults
 
-        // 1. Użytkownik ręcznie przypiął cytat
         if let pinnedID = defaults?.string(forKey: AppConfig.Keys.pinnedQuoteID),
            let uuid = UUID(uuidString: pinnedID),
            let quote = fetchQuote(by: uuid) {
             return quote
         }
 
-        // 2. Dzisiejszy cytat już wylosowany - zwróć ten sam
         let today = Calendar.current.startOfDay(for: Date())
         if let lastDate = defaults?.object(forKey: AppConfig.Keys.lastQuoteDate) as? Date,
            Calendar.current.startOfDay(for: lastDate) == today,
@@ -44,7 +39,6 @@ struct Provider: TimelineProvider {
             return quote
         }
 
-        // 3. Nowy dzień - wylosuj i zapamiętaj
         let quote = QuoteStore().getRandomQuote() ?? Quote(text: "Dodaj swój pierwszy cytat!", author: "")
         defaults?.set(Date(), forKey: AppConfig.Keys.lastQuoteDate)
         defaults?.set(quote.id.uuidString, forKey: AppConfig.Keys.dailyQuoteID)
@@ -65,7 +59,7 @@ struct QuoteEntry: TimelineEntry {
     let quote: Quote
 }
 
-// MARK: - Widget View (jeden widok dla wszystkich rozmiarów)
+// MARK: - Widget View
 struct WidgetView: View {
     let quote: Quote
     @Environment(\.widgetFamily) var family
@@ -73,7 +67,7 @@ struct WidgetView: View {
     private var fontSize: CGFloat {
         switch family {
         case .systemSmall: return 13
-        default:           return 16  // medium i large - taki sam rozmiar
+        default:           return 16
         }
     }
 
@@ -93,7 +87,7 @@ struct WidgetView: View {
 
     private var padding: CGFloat {
         switch family {
-        case .systemSmall: return 16
+        case .systemSmall:  return 16
         case .systemMedium: return 20
         default:            return 24
         }
@@ -107,37 +101,67 @@ struct WidgetView: View {
         }
     }
 
+    private var background: some View {
+        RadialGradient(
+            gradient: Gradient(colors: [
+                Color(red: 0.1, green: 0.05, blue: 0.05),
+                Color(red: 0.0, green: 0.0, blue: 0.0)
+            ]),
+            center: .center,
+            startRadius: 20,
+            endRadius: 500
+        )
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: 6) {
-                Image(systemName: "sun.max.fill")
-                    .font(.system(size: headerSize, weight: .medium))
-                    .foregroundColor(.white.opacity(0.9))
-                Text("CYTAT DNIA")
-                    .font(.system(size: headerSize - 2, weight: .semibold, design: .rounded))
-                    .tracking(1.2)
-                    .foregroundColor(.white.opacity(0.7))
+        ZStack {
+            background
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(spacing: 6) {
+                    Image(systemName: "sun.max.fill")
+                        .font(.system(size: headerSize, weight: .medium))
+                        .foregroundColor(.white.opacity(0.9))
+                    Text("CYTAT DNIA")
+                        .font(.system(size: headerSize - 2, weight: .semibold, design: .rounded))
+                        .tracking(1.2)
+                        .foregroundColor(.white.opacity(0.7))
+                }
+
+                Spacer().frame(height: padding * 0.7)
+
+                Text(quote.text)
+                    .font(.system(size: fontSize, weight: .regular, design: .serif))
+                    .foregroundColor(.white)
+                    .lineLimit(lineLimit)
+                    .lineSpacing(3)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Spacer().frame(height: padding * 0.7)
+
+                Text(quote.author.uppercased())
+                    .font(.system(size: authorSize, weight: .bold, design: .rounded))
+                    .tracking(1.0)
+                    .foregroundColor(.white.opacity(0.6))
+                    .lineLimit(1)
             }
-
-            Spacer().frame(height: padding * 0.7)
-
-            Text(quote.text)
-                .font(.system(size: fontSize, weight: .regular, design: .serif))
-                .foregroundColor(.white)
-                .lineLimit(lineLimit)
-                .lineSpacing(3)
-                .fixedSize(horizontal: false, vertical: true)
-
-            Spacer().frame(height: padding * 0.7)
-
-            Text(quote.author.uppercased())
-                .font(.system(size: authorSize, weight: .bold, design: .rounded))
-                .tracking(1.0)
-                .foregroundColor(.white.opacity(0.6))
-                .lineLimit(1)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            .padding(padding)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .padding(padding)
+        // iOS 17+ wymaga containerBackground
+        .modifier(WidgetBackgroundModifier(background: background))
+    }
+}
+
+// MARK: - Background Modifier (iOS 16 + iOS 17 kompatybilny)
+struct WidgetBackgroundModifier<Background: View>: ViewModifier {
+    let background: Background
+
+    func body(content: Content) -> some View {
+        if #available(iOS 17.0, *) {
+            content.containerBackground(for: .widget) { background }
+        } else {
+            content
+        }
     }
 }
 
@@ -147,17 +171,6 @@ struct QuoteWidgetEntryView: View {
 
     var body: some View {
         WidgetView(quote: entry.quote)
-            .containerBackground(for: .widget) {
-                RadialGradient(
-                    gradient: Gradient(colors: [
-                        Color(red: 0.1, green: 0.05, blue: 0.05),
-                        Color(red: 0.0, green: 0.0, blue: 0.0)
-                    ]),
-                    center: .center,
-                    startRadius: 20,
-                    endRadius: 500
-                )
-            }
     }
 }
 
@@ -173,6 +186,5 @@ struct QuoteWidget: Widget {
         .configurationDisplayName("Cytat Dnia")
         .description("Wyświetla losowy cytat z Twojej kolekcji.")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
-        .contentMarginsDisabled()
     }
 }
