@@ -1,0 +1,57 @@
+workflows:
+  ios-development:
+    name: QuoteWidget iOS Build
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+
+    environment:
+      ios_signing:
+        distribution_type: development
+      vars:
+        XCODE_PROJECT: "QuoteWidget.xcodeproj"
+        XCODE_SCHEME: "QuoteWidget"
+        BUNDLE_ID: "com.yourname.QuoteWidget"  # ZMIEŃ na swój Bundle ID
+
+    scripts:
+      - name: Set Xcode version
+        script: xcode-select -p
+
+      - name: Install dependencies (jeśli używasz CocoaPods)
+        script: |
+          if [ -f "Podfile" ]; then
+            pod install
+          else
+            echo "No Podfile found, skipping pod install"
+          fi
+
+      - name: Build IPA
+        script: |
+          xcodebuild \
+            -project "$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Debug \
+            -sdk iphoneos \
+            -derivedDataPath derived_data \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Package IPA (bez podpisu - do AltStore)
+        script: |
+          mkdir -p Payload
+          cp -r derived_data/Build/Products/Debug-iphoneos/QuoteWidget.app Payload/
+          zip -r QuoteWidget.ipa Payload
+          rm -rf Payload
+
+    artifacts:
+      - "*.ipa"
+      - derived_data/Build/Products/Debug-iphoneos/*.app
+
+    publishing:
+      email:
+        recipients:
+          - your@email.com  # ZMIEŃ na swój email
+        notify:
+          success: true
+          failure: true
