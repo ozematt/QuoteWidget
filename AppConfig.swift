@@ -6,7 +6,7 @@ import SwiftUI
 enum AppConfig {
 
     // App Group
-    static let appGroup = "group.com.yourname.quotewidget"
+    static let appGroup = "group.com.loranstudio.quotewidget"
 
     // Klucze UserDefaults
     enum Keys {
